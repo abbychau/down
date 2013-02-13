@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="Content-Language" content="ja" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+ 	<script src="js/jquery-1.9.0.js"></script>
+	<script src="js/jquery-ui-1.10.0.custom.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="styles/slider-style.css">
+	<link rel="stylesheet" type="text/css" href="styles/main-style.css">
+
+	<title>お絵かきチャット</title>
+	<!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
+  </head>
+  <body>
+  	<script src="js/socket.io.js"></script>
+	<script>
+		$(function() {
+			// canvas要素のノードオブジェクト
+			var canvas = $('#canvas')[0];
+			// canvas要素の存在チェックとCanvas未対応ブラウザの対処
+			if ( ! canvas || ! canvas.getContext ) {
+				alert("canvas非対応ブラウザです");
+			}
+			var ctx = canvas.getContext('2d');
+
+			//背景描画
+			function drawBackground() {
+				ctx.fillStyle = 'rgb(235, 235, 235)';
+				ctx.fillRect(0,0,canvas.width,canvas.height);
+			};
+			function drawLine(prev,next,config) {
+				ctx.strokeStyle = config.color;
+				ctx.lineWidth = config.size;
+				ctx.beginPath();
+				ctx.moveTo(prev.x, prev.y);
+				ctx.lineTo(next.x, next.y);
+				ctx.stroke();
+				ctx.closePath();
+			}
+			drawBackground();//背景初期化
+
+			//クライアントの設定
+			var client = {id:0,name:$('#name').val()};
+
+			//-----------------
+			// イベントリスナー
+			//-----------------
+			$('span.color-tile').click(function(){
+				$('.cursor-view').css('background-color', $(this).css('background-color'));
+
+				//選択
+				$('.color-tile.selected').removeClass('selected');
+				$(this).addClass('selected');
+			});
+
+
+			//ストローク
+			var clicking = false;
+			var prev = {x:0,y:0};
+			var config = {size:1,color:$('.color-tile.selected').css('background-color')}
+			$('#canvas').mousedown(function(e){
+				clicking = true;
+				prev.x = e.offsetX;
+				prev.y = e.offsetY;
+				config.color = $('.color-tile.selected').css('background-color');
+			});
+			$('#canvas').mouseup(function(){clicking = false;})
+			$('#canvas').mousemove(function(e){
+				if(clicking == false) return;
+				drawLine(prev,{x:e.offsetX,y:e.offsetY},config);
+
+				prev.x = e.offsetX;
+				prev.y = e.offsetY;
+			});
+
+			//発言
+			$('#send').click(function(){
+				if($('#message').val()){
+					socket.emit('message',{id:client.id,name:client.name,message:$('#message').val()});
+					$('#message').val('');
+				}
+			});
+			$('#message').keypress(function (e) {
+				if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+					$('#send').click();
+				}
+			});
+
+			//名前変更
+			$('#name').change(function(){
+				client.name = $(this).val();
+			});
+
+
+			//-----------------
+			// WebSocket通信
+			//-----------------
+			var socket = io.connect('http://localhost:9001');
+			socket.on('init', function (data) {
+				client.id = data.id;
+				socket.emit('init',{id:client.id,name:client.name});
+			});
+
+			//ストロークを受け取ったとき
+			socket.on('stroke',function (data) {
+			});
+
+			//メッセージを受け取ったとき
+			socket.on('message',function (data) {
+				var text = $('#textarea');
+				text.val(data.name+'('+data.id+')'+':'+data.message+'\n'+text.val());
+			});
+
+			//タイムアウトしないように、定期的にidを送り続ける
+			setInterval(function(){
+				if(client.id>0){
+					socket.emit('timeout',{id:client.id});
+				}
+			}, 100);
+		});
+
+		//スライダー設定
+		$(function() {
+			//Store frequently elements in variables
+			var slider  = $('#slider'),
+				tooltip = $('.tooltip');
+
+			//Hide the Tooltip at first
+			tooltip.hide();
+
+			//Call the Slider
+			slider.slider({
+				//Config
+				range: "min",
+				min: 1,
+				max: 24,
+				value: 8,
+
+				start: function(event,ui) {
+					tooltip.fadeIn('fast');
+				},
+
+				//Slider Event
+				slide: function(event, ui) { //When the slider is sliding
+					var value  = slider.slider('value'),
+						volume = $('.volume');
+					tooltip.css('left', value).text(ui.value);  //Adjust the tooltip accordingly
+					volume.html(ui.value);
+				},
+
+				stop: function(event,ui) {
+					tooltip.fadeOut('fast');
+				},
+			});
+
+		});
+	</script>
+
+	<h2>お絵かきチャット</h2>
+	<div class="tools">
+		<span class="color-tile selected" data-tooltip="色:#000000" style="background-color: rgb(0, 0, 0);"></span>
+		<span class="color-tile" data-tooltip="色:#808080" style="background-color: rgb(128, 128, 128);"></span>
+		<span class="color-tile" data-tooltip="色:#C0C0C0" style="background-color: rgb(192, 192, 192);"></span>
+		<span class="color-tile" data-tooltip="色:#FFFFFF" style="background-color: rgb(255, 255, 255);"></span>
+		<span class="color-tile" data-tooltip="色:#FF3B21" style="background-color: rgb(255, 59, 33);"></span>
+		<span class="color-tile" data-tooltip="色:#FFBD16" style="background-color: rgb(255, 189, 22);"></span>
+		<span class="color-tile" data-tooltip="色:#F5F30F" style="background-color: rgb(245, 243, 15);"></span>
+		<span class="color-tile" data-tooltip="色:#A5E975" style="background-color: rgb(165, 233, 117);"></span>
+		<span class="color-tile" data-tooltip="色:#71DBFB" style="background-color: rgb(113, 219, 251);"></span>
+		<span class="color-tile" data-tooltip="色:#FA80F9" style="background-color: rgb(250, 128, 249);"></span>
+		<span class="color-tile" data-tooltip="色:#8E0000" style="background-color: rgb(142, 0, 0);"></span>
+		<span class="color-tile" data-tooltip="色:#FFCC99" style="background-color: rgb(255, 204, 153);"></span>
+		<span class="color-tile" data-tooltip="色:#877D30" style="background-color: rgb(135, 125, 48);"></span>
+		<span class="color-tile" data-tooltip="色:#008F47" style="background-color: rgb(0, 143, 71);"></span>
+		<span class="color-tile" data-tooltip="色:#313BCD" style="background-color: rgb(49, 59, 205);"></span>
+		<span class="color-tile" data-tooltip="色:#C02E97" style="background-color: rgb(192, 46, 151);"></span>
+		<span class="color-tile" data-tooltip="色:#3F037E" style="background-color: rgb(63, 3, 126);"></span>
+	</div>
+	<div class="cursor-view"><div>
+	<section>
+		<span class="tooltip"></span>
+		<div id="slider"></div>
+		<span class="volume"></span>
+	</section>
+	<br/><br/>
+	<div class="view">
+		<canvas id="canvas" width="800" height="500"></canvas><br/>
+	</div>
+	<div class="controller">
+		<input id="name" type="text" style="width:100px;" value="no name"/>
+		<input id="message" type="text" style="width:450px;"/>
+		<input id="send" type="button" value="Send Message" style="width:135px;"/><br/>
+	  	<textarea id="textarea" style="width:750px;height:7em;line-height:150%;" readonly></textarea>
+	</div>
+  </body>
+</html>
