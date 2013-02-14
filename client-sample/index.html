@@ -27,12 +27,14 @@
 			}
 			var ctx = canvas.getContext('2d');
 
-			//背景描画
 			function drawBackground() {
 				ctx.fillStyle = 'rgb(235, 235, 235)';
 				ctx.fillRect(0,0,canvas.width,canvas.height);
 			};
+
 			function drawLine(prev,next,config) {
+				ctx.lineJoin = "round";
+				ctx.lineCap = "round";
 				ctx.strokeStyle = config.color;
 				ctx.lineWidth = config.size;
 				ctx.beginPath();
@@ -49,8 +51,9 @@
 			//-----------------
 			// イベントリスナー
 			//-----------------
+			//色選択
 			$('span.color-tile').click(function(){
-				$('.cursor-view').css('background-color', $(this).css('background-color'));
+				$('#cursor-view').css('background-color', $(this).css('background-color'));
 
 				//選択
 				$('.color-tile.selected').removeClass('selected');
@@ -61,7 +64,7 @@
 			//ストローク
 			var clicking = false;
 			var prev = {x:0,y:0};
-			var config = {size:1,color:$('.color-tile.selected').css('background-color')}
+			var config = {size:10,color:$('.color-tile.selected').css('background-color')}
 			$('#canvas').mousedown(function(e){
 				clicking = true;
 				prev.x = e.offsetX;
@@ -95,7 +98,6 @@
 				client.name = $(this).val();
 			});
 
-
 			//-----------------
 			// WebSocket通信
 			//-----------------
@@ -121,10 +123,9 @@
 					socket.emit('timeout',{id:client.id});
 				}
 			}, 100);
-		});
-
-		//スライダー設定
-		$(function() {
+	
+			//-----------------------------------
+			//スライダー設定
 			//Store frequently elements in variables
 			var slider  = $('#slider'),
 				tooltip = $('.tooltip');
@@ -150,13 +151,14 @@
 						volume = $('.volume');
 					tooltip.css('left', value).text(ui.value);  //Adjust the tooltip accordingly
 					volume.html(ui.value);
+					$('#cursor-view').css('height',ui.value).css('width',ui.value);
 				},
 
 				stop: function(event,ui) {
 					tooltip.fadeOut('fast');
+					config.size = ui.value;
 				},
 			});
-
 		});
 	</script>
 
@@ -180,7 +182,9 @@
 		<span class="color-tile" data-tooltip="色:#C02E97" style="background-color: rgb(192, 46, 151);"></span>
 		<span class="color-tile" data-tooltip="色:#3F037E" style="background-color: rgb(63, 3, 126);"></span>
 	</div>
-	<div class="cursor-view"><div>
+	<div class="cursor-view">
+		<div id="cursor-view"></div>
+	</div>
 	<section>
 		<span class="tooltip"></span>
 		<div id="slider"></div>
