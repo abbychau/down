@@ -15,7 +15,7 @@
 	<title>お絵かきチャット</title>
 	<!--[if IE]><script type="text/javascript" src="excanvas.js"></script><![endif]-->
   </head>
-  <body>
+  <body style="background-color:rgb(235, 235, 235);">
   	<script src="js/socket.io.js"></script>
 	<script>
 		$(function() {
@@ -28,7 +28,7 @@
 			var ctx = canvas.getContext('2d');
 
 			function drawBackground() {
-				ctx.fillStyle = 'rgb(235, 235, 235)';
+				ctx.fillStyle = 'rgb(255, 255, 255)';
 				ctx.fillRect(0,0,canvas.width,canvas.height);
 			};
 
@@ -64,7 +64,8 @@
 			//ストローク
 			var clicking = false;
 			var prev = {x:0,y:0};
-			var config = {size:10,color:$('.color-tile.selected').css('background-color')}
+			var config = {size:10,color:$('.color-tile.selected').css('background-color')};
+			var strokes = new Array();
 			$('#canvas').mousedown(function(e){
 				clicking = true;
 				prev.x = e.offsetX;
