@@ -43,6 +43,21 @@
 				ctx.stroke();
 				ctx.closePath();
 			}
+
+			function drawStrokes(config,strokes) {
+				ctx.lineJoin = "round";
+				ctx.lineCap = "round";
+				ctx.strokeStyle = config.color;
+				ctx.lineWidth = config.size;
+				ctx.beginPath();
+				ctx.moveTo(strokes[0].x, strokes[0].y);
+				for (var i = 1; i < strokes.length; i++) {
+					ctx.lineTo(strokes[i].x, strokes[i].y);
+				}
+				ctx.stroke();
+				ctx.closePath();
+			}
+
 			drawBackground();//背景初期化
 
 			//クライアントの設定
