@@ -132,6 +132,7 @@
 
 			//ストロークを受け取ったとき
 			socket.on('stroke',function (data) {
+				drawStrokes(data.config,data.strokes);
 			});
 
 			//メッセージを受け取ったとき
