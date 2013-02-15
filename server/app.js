@@ -46,7 +46,7 @@ io.sockets.on('connection', function (socket) {
 
   //ストローク転送
   socket.on('stroke', function (data) {
-    stroke_log.push(data.stroke);
+    stroke_log.push(data);
     socket.broadcast.emit('stroke',data);
   });
 

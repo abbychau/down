@@ -45,6 +45,7 @@
 			}
 
 			function drawStrokes(config,strokes) {
+				if(strokes.length<=0) return;
 				ctx.lineJoin = "round";
 				ctx.lineCap = "round";
 				ctx.strokeStyle = config.color;
