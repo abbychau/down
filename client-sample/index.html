@@ -76,6 +76,12 @@
 				$(this).addClass('selected');
 			});
 
+			//全消し
+			$('#all-clear').click(function(){
+				if(confirm('本当に全消ししますか？')){
+					socket.emit('all-clear',{id:client.id,name:client.name});
+				}
+			});
 
 			//ストローク
 			var clicking = false;
@@ -134,6 +140,12 @@
 					drawStrokes(data.stroke[i].config,data.stroke[i].strokes);
 				};
 			});
+
+			//全消しコマンドを受け取ったとき
+			socket.on('all-clear',function (data){
+				drawBackground();
+			});
+
 
 			//ストロークを受け取ったとき
 			socket.on('stroke',function (data) {
@@ -221,6 +233,9 @@
 		<span class="volume"></span>
 	</section>
 	<br/><br/>
+	<div class="all-clear">
+		<span id="all-clear" style="background-color: rgb(111, 111, 111);">[ 全消し ]</span>
+	</div>
 	<div class="view">
 		<canvas id="canvas" width="800" height="500"></canvas><br/>
 	</div>

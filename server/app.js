@@ -44,6 +44,15 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
   });
 
+  //ログイン通知
+  socket.on('all-clear', function (data) {
+    stroke_log.length = 0;
+    
+    socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんが全消しを実行しました。'});
+    socket.broadcast.emit('all-clear',data);
+    socket.emit('all-clear',data);
+  });
+
   //ストローク転送
   socket.on('stroke', function (data) {
     stroke_log.push(data);
