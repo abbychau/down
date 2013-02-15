@@ -129,6 +129,10 @@
 			socket.on('init', function (data) {
 				client.id = data.id;
 				socket.emit('init',{id:client.id,name:client.name});
+
+				for (var i = 0; i < data.stroke.length; i++) {
+					drawStrokes(data.stroke[i].config,data.stroke[i].strokes);
+				};
 			});
 
 			//ストロークを受け取ったとき
