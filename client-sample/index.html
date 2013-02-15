@@ -86,14 +86,20 @@
 				prev.x = e.offsetX;
 				prev.y = e.offsetY;
 				config.color = $('.color-tile.selected').css('background-color');
+				strokes.length = 0;
 			});
-			$('#canvas').mouseup(function(){clicking = false;})
+			$('#canvas').mouseup(function(){
+				clicking = false;
+				socket.emit('stroke',{id:client.id,config:config,strokes:strokes});
+			});
 			$('#canvas').mousemove(function(e){
 				if(clicking == false) return;
 				drawLine(prev,{x:e.offsetX,y:e.offsetY},config);
 
 				prev.x = e.offsetX;
 				prev.y = e.offsetY;
+
+				strokes.push({x:prev.x,y:prev.y});
 			});
 
 			//発言
@@ -103,6 +109,7 @@
 					$('#message').val('');
 				}
 			});
+
 			$('#message').keypress(function (e) {
 				if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
 					$('#send').click();
@@ -139,6 +146,7 @@
 					socket.emit('timeout',{id:client.id});
 				}
 			}, 100);
+
 	
 			//-----------------------------------
 			//スライダー設定
