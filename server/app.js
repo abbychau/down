@@ -19,6 +19,19 @@ function handler (req, res) {
 
 //localhostのpixiv-oekaki-chatのデータベースに接続。
 var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
+//お絵かき用のスキーマを宣言。
+var OekakiSchema = new mongoose.Schema({
+  name:String
+  ,discription:String
+  ,clients:mongoose.Schema.Types.Mixed
+  ,command_log:[{
+    command:String
+    ,value:mongoose.Schema.Types.Mixed
+  }]
+});
+//スキーマからモデルを生成。
+var Oekaki = db.model('Oekaki',OekakiSchema);
+
 var clients = new Object();
 var stroke_log = new Array();
 var new_id = 0;
