@@ -4,5 +4,6 @@
   , "private": true
   , "dependencies": {
     "socket.io": "0.9.11"
+    ,"mongoose": "3.5.6"
   }
 }

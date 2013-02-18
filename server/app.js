@@ -1,6 +1,7 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
-  , fs = require('fs');
+  , fs = require('fs')
+  , mongoose = require('mongoose');
 
 app.listen(9001);
 
@@ -16,6 +17,8 @@ function handler (req, res) {
   });
 }
 
+//localhostのpixiv-oekaki-chatのデータベースに接続。
+var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
 var clients = new Object();
 var stroke_log = new Array();
 var new_id = 0;
