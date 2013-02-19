@@ -1,3 +1,7 @@
+var OekakiClient = null;
+
+(function() {
+
 //オブジェクトコピー
 function copy(obj) {
   var hoge = function(){};
@@ -5,16 +9,22 @@ function copy(obj) {
   return hoge;
 }
 
-var OekakiClient = function(server_url,_room_id){
+OekakiClient = function(server_url,_room_id){
 	//クライアント情報
 	var client = {id:0,name:'no name',room_id:0};
+	this.client = client;
+
 	//ストロークの時系列情報
 	var stroke_log = new Array();
+	this.stroke_log = stroke_log;
 
 	//描画用
 	var config = {size:10,color:'rgb(0,0,0)'};
+	this.config = config;
+
 	//1ストロークスタック
 	var stroke_stack = new Array();
+	this.stroke_stack = stroke_stack;
 
 
 
@@ -25,6 +35,7 @@ var OekakiClient = function(server_url,_room_id){
 
 	//WebSocket
 	var socket = io.connect(server_url);
+	this.socket = socket;
 
 	/*
 	 初期化コマンド
@@ -44,47 +55,9 @@ var OekakiClient = function(server_url,_room_id){
 		}
 	*/
 	socket.on('init', function (data) {
-		this.client.id = data.id;
-		socket.emit('init',{id:this.client.id,name:this.client.name});
+		client.id = data.id;
+		socket.emit('init',{id:client.id,name:client.name});
 		stroke_log = copy(data.stroke);
-	});
-
-
-	/*
-	 全消しコマンドを受け取ったとき
-		data = {}
-	*/
-	var call_back_allclear = function(){};
-	socket.on('all-clear',function (data){
-		stroke_log.length = 0;
-		call_back_allclear();
-	});
-
-	/*
-	 ストロークを受け取ったとき
-		data = {
-			id:Number
-			,config:{size:Number,color:String}
-			,strokes:[{x:Number,y:Number}]
-		}
-	*/
-	var call_back_stroke = function(){};
-	socket.on('stroke',function (data) {
-		stroke_log.push(data);
-		call_back_stroke(data);
-	});
-
-	/*
-	 メッセージを受け取ったとき
-		data = {
-			id:Number
-			,name:String
-			,message:String
-		}
-	*/
-	var call_back_message = function(){};
-	socket.on('message',function (data) {
-		call_back_message(data);
 	});
 
 	//タイムアウトしないように、定期的にidを送り続ける
@@ -113,9 +86,11 @@ OekakiClient.prototype = {
 		this.socket.emit('stroke',{
 			id:this.client.id,
 			config:this.config,
-			strokes:this.stroke_stack
+			strokes:copy(this.stroke_stack)
 		});
+		this.stroke_stack.length = 0;
 	},
+	//全消しコマンドを受け取ったとき
 	sendAllClear:function(){
 		this.socket.emit('all-clear',{
 			id:this.client.id,
@@ -130,12 +105,40 @@ OekakiClient.prototype = {
 		});
 	},
 	receiveAllClear:function(_callback){
-		this.call_back_allclear = _callback;
+		/*
+		 全消しコマンドを受け取ったとき
+			data = {}
+		*/
+		this.socket.on('all-clear',function (data){
+			stroke_log.length = 0;
+			_callback();
+		});
 	},
 	receiveStroke:function(_callback){
-		this.call_back_stroke = _callback;
+		/*
+		 ストロークを受け取ったとき
+			data = {
+				id:Number
+				,config:{size:Number,color:String}
+				,strokes:[{x:Number,y:Number}]
+			}
+		*/
+		this.socket.on('stroke',function (data) {
+			stroke_log.push(data);
+			_callback(data);
+		});
 	},
 	receiveMessage:function(_callback){
-		this.call_back_message = _callback;
+		/*
+		 メッセージを受け取ったとき
+			data = {
+				id:Number
+				,name:String
+				,message:String
+			}
+		*/
+		this.socket.on('message',_callback);
 	}
 };
+
+})();
