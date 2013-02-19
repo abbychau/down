@@ -31,7 +31,7 @@ var Oekaki = db.model('Oekaki',OekakiSchema);
 //ひとつも部屋がなければ作成
 Oekaki.find(function(err,items){
   if(err){console.log(err);}
-  if(items.length==0 || true){
+  if(items.length==0){
     Oekaki.remove({},function(err){});
     var oekaki = new Oekaki({
       id:0
@@ -47,6 +47,12 @@ var stroke_log = new Array();
 var new_id = 0;
 const N_TIMEOUT = 30;
 
+//DBから状態をロード
+Oekaki.findOne({id:0},function(err,item){
+  if(err){console.log(err);}
+  stroke_log = item.stroke_log;
+});
+
 function makeClient(){
   var client = {
     id:++new_id,
@@ -60,6 +66,14 @@ function saveClient(_id){
   Oekaki.findOne({id:_id},function(err,item){
     if(err){console.log(err);}
     item.clients = clients;
+    item.save();
+  });
+}
+
+function saveStroke(_id){
+  Oekaki.findOne({id:_id},function(err,item){
+    if(err){console.log(err);}
+    item.stroke_log = stroke_log;
     item.save();
   });
 }
@@ -84,7 +98,8 @@ io.sockets.on('connection', function (socket) {
   //ログイン通知
   socket.on('all-clear', function (data) {
     stroke_log.length = 0;
-    
+    saveStroke(0);
+
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんが全消しを実行しました。'});
     socket.broadcast.emit('all-clear',data);
     socket.emit('all-clear',data);
@@ -93,6 +108,8 @@ io.sockets.on('connection', function (socket) {
   //ストローク転送
   socket.on('stroke', function (data) {
     stroke_log.push(data);
+    saveStroke(0);
+
     socket.broadcast.emit('stroke',data);
   });
 
