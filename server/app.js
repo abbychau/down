@@ -21,14 +21,11 @@ function handler (req, res) {
 var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
 //お絵かき用のスキーマを宣言。
 var OekakiSchema = new mongoose.Schema({
-  name:String
-  ,discription:String
-  ,clients:mongoose.Schema.Types.Mixed
-  ,command_log:[{
-    command:String
-    ,value:mongoose.Schema.Types.Mixed
-  }]
+  id:String
+  ,clients:{String:mongoose.Schema.Types.Mixed}
+  ,string_log:[{x:Number,y:Number}]
 });
+
 //スキーマからモデルを生成。
 var Oekaki = db.model('Oekaki',OekakiSchema);
 
