@@ -21,8 +21,8 @@ function handler (req, res) {
 var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
 //お絵かき用のスキーマを宣言。
 var OekakiSchema = new mongoose.Schema({
-  id:String
-  ,clients:{String:mongoose.Schema.Types.Mixed}
+  id:Number
+  ,clients:{}
   ,string_log:[{x:Number,y:Number}]
 });
 
