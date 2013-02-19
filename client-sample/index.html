@@ -17,6 +17,7 @@
   </head>
   <body style="background-color:rgb(235, 235, 235);">
   	<script src="js/socket.io.js"></script>
+  	<script src="../client/oekaki-chat.js"></script>
 	<script>
 		$(function() {
 			// canvas要素のノードオブジェクト
@@ -61,8 +62,9 @@
 
 			drawBackground();//背景初期化
 
-			//クライアントの設定
-			var client = {id:0,name:$('#name').val()};
+			//お絵かきクライアントクラス
+			var oekaki = new OekakiClient('http://localhost:9001');
+
 
 			//-----------------
 			// イベントリスナー
@@ -74,45 +76,46 @@
 				//選択
 				$('.color-tile.selected').removeClass('selected');
 				$(this).addClass('selected');
+
+				//設定
+				oekaki.setBrashColor($(this).css('background-color'));
 			});
 
 			//全消し
 			$('#all-clear').click(function(){
 				if(confirm('本当に全消ししますか？')){
-					socket.emit('all-clear',{id:client.id,name:client.name});
+					oekaki.sendAllClear();
 				}
 			});
 
 			//ストローク
 			var clicking = false;
 			var prev = {x:0,y:0};
-			var config = {size:10,color:$('.color-tile.selected').css('background-color')};
-			var strokes = new Array();
 			$('#canvas').mousedown(function(e){
 				clicking = true;
 				prev.x = e.offsetX;
 				prev.y = e.offsetY;
-				config.color = $('.color-tile.selected').css('background-color');
-				strokes.length = 0;
 			});
 			$('#canvas').mouseup(function(){
 				clicking = false;
-				socket.emit('stroke',{id:client.id,config:config,strokes:strokes});
+				oekaki.sendStroke(); //すべての軌跡を送信
 			});
 			$('#canvas').mousemove(function(e){
 				if(clicking == false) return;
-				drawLine(prev,{x:e.offsetX,y:e.offsetY},config);
+				drawLine(prev,{x:e.offsetX,y:e.offsetY},oekaki.config);
 
 				prev.x = e.offsetX;
 				prev.y = e.offsetY;
 
-				strokes.push({x:prev.x,y:prev.y});
+				//軌跡を追加
+				oekaki.setPoint(prev.x,prev.y);
 			});
 
 			//発言
 			$('#send').click(function(){
 				if($('#message').val()){
-					socket.emit('message',{id:client.id,name:client.name,message:$('#message').val()});
+					//チャットを送信
+					oekaki.sendMessage($('#message').val());
 					$('#message').val('');
 				}
 			});
@@ -125,47 +128,34 @@
 
 			//名前変更
 			$('#name').change(function(){
-				client.name = $(this).val();
+				oekaki.setClientName($(this).val());
 			});
 
-			//-----------------
-			// WebSocket通信
-			//-----------------
-			var socket = io.connect('http://localhost:9001');
-			socket.on('init', function (data) {
-				client.id = data.id;
-				socket.emit('init',{id:client.id,name:client.name});
+			//初期化
+			for (var i = 0; i < oekaki.stroke_stack.length; i++) {
+				drawStrokes(oekaki.stroke_stack[i].config,oekaki.stroke_stack[i].strokes);
+			};
 
-				for (var i = 0; i < data.stroke.length; i++) {
-					drawStrokes(data.stroke[i].config,data.stroke[i].strokes);
-				};
-			});
-
+			//-----------------------------------
+			//お絵かきチャット設定
+			
 			//全消しコマンドを受け取ったとき
-			socket.on('all-clear',function (data){
+			oekaki.receiveAllClear(function(){
 				drawBackground();
 			});
 
-
 			//ストロークを受け取ったとき
-			socket.on('stroke',function (data) {
+			oekaki.receiveStroke(function (data){
 				drawStrokes(data.config,data.strokes);
 			});
 
 			//メッセージを受け取ったとき
-			socket.on('message',function (data) {
+			oekaki.receiveMessage(function (data){
 				var text = $('#textarea');
 				text.val(data.name+'('+data.id+')'+':'+data.message+'\n'+text.val());
 			});
 
-			//タイムアウトしないように、定期的にidを送り続ける
-			setInterval(function(){
-				if(client.id>0){
-					socket.emit('timeout',{id:client.id});
-				}
-			}, 100);
 
-	
 			//-----------------------------------
 			//スライダー設定
 			//Store frequently elements in variables
@@ -198,7 +188,8 @@
 
 				stop: function(event,ui) {
 					tooltip.fadeOut('fast');
-					config.size = ui.value;
+					oekaki.setBrashSize(ui.value);
+					//config.size = ui.value;
 				},
 			});
 		});
