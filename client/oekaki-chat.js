@@ -86,7 +86,7 @@ OekakiClient.prototype = {
 		this.socket.emit('stroke',{
 			id:this.client.id,
 			config:this.config,
-			strokes:copy(this.stroke_stack)
+			strokes:this.stroke_stack
 		});
 		this.stroke_stack.length = 0;
 	},
@@ -109,8 +109,9 @@ OekakiClient.prototype = {
 		 全消しコマンドを受け取ったとき
 			data = {}
 		*/
+		var log = this.stroke_log;
 		this.socket.on('all-clear',function (data){
-			stroke_log.length = 0;
+			log.length = 0;
 			_callback();
 		});
 	},
@@ -123,8 +124,9 @@ OekakiClient.prototype = {
 				,strokes:[{x:Number,y:Number}]
 			}
 		*/
+		var log = this.stroke_log;
 		this.socket.on('stroke',function (data) {
-			stroke_log.push(data);
+			log.push(data);
 			_callback(data);
 		});
 	},
