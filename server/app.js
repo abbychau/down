@@ -23,7 +23,7 @@ var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
 var OekakiSchema = new mongoose.Schema({
   id:Number
   ,clients:{}
-  ,string_log:[{x:Number,y:Number}]
+  ,stroke_log:[{x:Number,y:Number}]
 });
 
 //スキーマからモデルを生成。
@@ -36,7 +36,7 @@ Oekaki.find(function(err,items){
     var oekaki = new Oekaki({
       id:0
       ,clients:{}
-      ,string_log:[]
+      ,stroke_log:[]
     });
     oekaki.save();
   }
