@@ -28,6 +28,19 @@ var OekakiSchema = new mongoose.Schema({
 
 //スキーマからモデルを生成。
 var Oekaki = db.model('Oekaki',OekakiSchema);
+//ひとつも部屋がなければ作成
+Oekaki.find(function(err,items){
+  if(err){console.log(err);}
+  if(items.length==0 || true){
+    Oekaki.remove({},function(err){});
+    var oekaki = new Oekaki({
+      id:0
+      ,clients:{}
+      ,string_log:[]
+    });
+    oekaki.save();
+  }
+});
 
 var clients = new Object();
 var stroke_log = new Array();
