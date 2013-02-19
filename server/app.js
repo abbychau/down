@@ -110,5 +110,9 @@ io.sockets.on('connection', function (socket) {
 
 //debug
 setInterval(function(){
+  Oekaki.findOne({id:0},function(err,item){
+    if(err){console.log(err);}
+    console.log(item)
+  });
   console.log(clients);
 }, 1000);
