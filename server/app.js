@@ -56,9 +56,18 @@ function makeClient(){
   return client;
 };
 
+function saveClient(_id){
+  Oekaki.findOne({id:_id},function(err,item){
+    if(err){console.log(err);}
+    item.clients = clients;
+    item.save();
+  });
+}
+
 io.sockets.on('connection', function (socket) {
   var c = makeClient();
   clients[c.id] = c;
+  saveClient(0);
 
   //初期化
   // ストロークの再生
@@ -67,6 +76,8 @@ io.sockets.on('connection', function (socket) {
   //ログイン通知
   socket.on('init', function (data) {
     clients[data.id].name = data.name;
+    saveClient(0);
+
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
   });
 
@@ -104,6 +115,8 @@ io.sockets.on('connection', function (socket) {
       //退出したことを通知
       socket.broadcast.emit('message',{id:0,name:'アナウンス',message:c.name+'('+c.id+')'+'さんがログアウトしました。'});
       delete clients[c.id];
+      //DB更新
+      saveClient(0);
     }
   }, 100);
 });
