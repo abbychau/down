@@ -46,13 +46,14 @@ Oekaki.find(function(err,items){
   }
 });
 
+const DEFAULT_ROOM_ID = 0;
 var clients = new Object();
 var stroke_log = new Array();
 var new_id = 0;
 const N_TIMEOUT = 30;
 
 //DBから状態をロード
-Oekaki.findOne({id:0},function(err,item){
+Oekaki.findOne({id:DEFAULT_ROOM_ID},function(err,item){
   if(err){console.log(err);}
   stroke_log = item.stroke_log;
 });
@@ -85,7 +86,7 @@ function saveStroke(_id){
 io.sockets.on('connection', function (socket) {
   var c = makeClient();
   clients[c.id] = c;
-  saveClient(0);
+  saveClient(DEFAULT_ROOM_ID);
 
   //初期化
   // ストロークの再生
@@ -93,16 +94,16 @@ io.sockets.on('connection', function (socket) {
 
   //ストロークのログを取得
   socket.on('stroke_log',function (data){
-    Oekaki.findOne({id:0},function(err,item){
+    Oekaki.findOne({id:DEFAULT_ROOM_ID},function(err,item){
       if(err){console.log(err);}
-      socket.emit('stroke_log',{id:0,name:item.name,description:item.description,stroke:stroke_log});
+      socket.emit('stroke_log',{id:item.id,name:item.name,description:item.description,stroke:stroke_log});
     });
   });
 
   //ログイン通知
   socket.on('init', function (data) {
     clients[data.id].name = data.name;
-    saveClient(0);
+    saveClient(DEFAULT_ROOM_ID);
 
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
   });
@@ -110,7 +111,7 @@ io.sockets.on('connection', function (socket) {
   //ログイン通知
   socket.on('all-clear', function (data) {
     stroke_log.length = 0;
-    saveStroke(0);
+    saveStroke(DEFAULT_ROOM_ID);
 
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんが全消しを実行しました。'});
     socket.broadcast.emit('all-clear',data);
@@ -120,7 +121,7 @@ io.sockets.on('connection', function (socket) {
   //ストローク転送
   socket.on('stroke', function (data) {
     stroke_log.push(data);
-    saveStroke(0);
+    saveStroke(DEFAULT_ROOM_ID);
 
     socket.broadcast.emit('stroke',data);
   });
@@ -145,14 +146,14 @@ io.sockets.on('connection', function (socket) {
       socket.broadcast.emit('message',{id:0,name:'アナウンス',message:c.name+'('+c.id+')'+'さんがログアウトしました。'});
       delete clients[c.id];
       //DB更新
-      saveClient(0);
+      saveClient(DEFAULT_ROOM_ID);
     }
   }, 100);
 });
 
 //debug
 setInterval(function(){
-  Oekaki.findOne({id:0},function(err,item){
+  Oekaki.findOne({id:DEFAULT_ROOM_ID},function(err,item){
     if(err){console.log(err);}
     console.log(item.clients)
   });

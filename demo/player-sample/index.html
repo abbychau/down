@@ -63,7 +63,6 @@
 
 				var oekaki = new OekakiClient('http://localhost:9001')
 				oekaki.receiveAllStroke(function(data){
-					console.log(data.name);
 					$('#oekaki-chat-label').html(data.name);
 					for (var i = 0; i < data.stroke.length; i++) {
 						var st = data.stroke[i];
