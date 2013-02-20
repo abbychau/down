@@ -132,9 +132,12 @@
 			});
 
 			//初期化
-			for (var i = 0; i < oekaki.stroke_stack.length; i++) {
-				drawStrokes(oekaki.stroke_stack[i].config,oekaki.stroke_stack[i].strokes);
-			};
+			oekaki.receiveAllStroke(function(data){
+				for (var i = 0; i < data.stroke.length; i++) {
+					var st = data.stroke[i];
+					drawStrokes(st.config,st.strokes);
+				};
+			});
 
 			//-----------------------------------
 			//お絵かきチャット設定
@@ -227,7 +230,7 @@
 		<span id="all-clear" style="background-color: rgb(111, 111, 111);">[ 全消し ]</span>
 	</div>
 	<div class="view">
-		<canvas id="canvas" width="800" height="500"></canvas><br/>
+		<canvas id="canvas" width="640" height="480"></canvas><br/>
 	</div>
 	<div class="controller">
 		<input id="name" type="text" style="width:100px;" value="no name"/>

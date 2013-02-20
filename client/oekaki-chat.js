@@ -57,7 +57,6 @@ OekakiClient = function(server_url,_room_id){
 	socket.on('init', function (data) {
 		client.id = data.id;
 		socket.emit('init',{id:client.id,name:client.name});
-		stroke_log = copy(data.stroke);
 	});
 
 	//タイムアウトしないように、定期的にidを送り続ける
@@ -114,6 +113,23 @@ OekakiClient.prototype = {
 			log.length = 0;
 			_callback();
 		});
+	},
+	receiveAllStroke:function(_callback){
+		/*
+		 すべてのストロークを受け取ったとき
+			data = {
+				id:Number
+				,stroke:[{
+					id:Number
+					,config:{size:Number,color:String}
+					,strokes:[{x:Number,y:Number}]
+				}]
+			}
+		*/
+		this.socket.on('stroke_log',function (data) {
+			_callback(data);
+		});
+		this.socket.emit('stroke_log');
 	},
 	receiveStroke:function(_callback){
 		/*

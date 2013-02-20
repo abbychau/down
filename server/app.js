@@ -87,6 +87,11 @@ io.sockets.on('connection', function (socket) {
   // ストロークの再生
   socket.emit('init',{id:c.id,stroke:stroke_log});
 
+  //ストロークのログを取得
+  socket.on('stroke_log',function (data){
+    socket.emit('stroke_log',{id:0,stroke:stroke_log});
+  });
+
   //ログイン通知
   socket.on('init', function (data) {
     clients[data.id].name = data.name;
