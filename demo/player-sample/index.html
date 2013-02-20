@@ -46,27 +46,27 @@
 					ctx.closePath();
 				}
 
-				function drawStrokes(config,strokes,scale) {
+				function drawStrokes(config,strokes,scaleX,scaleY) {
 					if(strokes.length<=0) return;
 					ctx.lineJoin = "round";
 					ctx.lineCap = "round";
 					ctx.strokeStyle = config.color;
-					ctx.lineWidth = config.size*scale;
+					ctx.lineWidth = config.size*scaleX;
 					ctx.beginPath();
-					ctx.moveTo(strokes[0].x*scale, strokes[0].y*scale);
+					ctx.moveTo(strokes[0].x*scaleX, strokes[0].y*scaleY);
 					for (var i = 1; i < strokes.length; i++) {
-						ctx.lineTo(strokes[i].x*scale, strokes[i].y*scale);
+						ctx.lineTo(strokes[i].x*scaleX, strokes[i].y*scaleY);
 					}
 					ctx.stroke();
 					ctx.closePath();
 				}
 
-				var oekaki = new OekakiClient('http://localhost:9001')
+				var oekaki = new OekakiClient('http://localhost:9001',0);
 				oekaki.receiveAllStroke(function(data){
 					$('#oekaki-chat-label').html(data.name);
 					for (var i = 0; i < data.stroke.length; i++) {
 						var st = data.stroke[i];
-						drawStrokes(st.config,st.strokes,9/16);
+						drawStrokes(st.config,st.strokes,0.4,0.3);
 					};
 				});
 			});
