@@ -6,7 +6,7 @@
 		<script src="js/jquery-1.9.0.js"></script>
 		<script src="js/socket.io.js"></script>
 		<style>
-			div#oekaki-chat {
+			div.oekaki-chat {
 				border-color: #269CE9;
 				background-color: #269CE9;
 				color: #EEEEEE;
@@ -16,57 +16,121 @@
 				padding: 5px 5px 15px;
 				font-size: 18px;
 			}
-			canvas#oekaki-chat-canvas {
+			canvas.oekaki-chat-canvas {
 				background-color: #EEEEEE;
 				width: 320px;
 				height: 240px;
 				margin-left: 10px;
 			}
 		</style>
-		<script>
-			$(function(){
-				// canvas要素のノードオブジェクト
-				var canvas = $('#oekaki-chat-canvas')[0];
-				var ctx = canvas.getContext('2d');
-
-				function drawStrokes(config,strokes,scaleX,scaleY) {
-					if(strokes.length<=0) return;
-					ctx.lineJoin = "round";
-					ctx.lineCap = "round";
-					ctx.strokeStyle = config.color;
-					ctx.lineWidth = config.size*scaleX;
-					ctx.beginPath();
-					ctx.moveTo(strokes[0].x*scaleX, strokes[0].y*scaleY);
-					for (var i = 1; i < strokes.length; i++) {
-						ctx.lineTo(strokes[i].x*scaleX, strokes[i].y*scaleY);
-					}
-					ctx.stroke();
-					ctx.closePath();
-				}
-
-				var oekaki = new OekakiClient('http://localhost:9001',0);
-				oekaki.receiveAllStroke(function(data){
-					$('#oekaki-chat-label').html(data.name);
-					for (var i = 0; i < data.stroke.length; i++) {
-						var st = data.stroke[i];
-						drawStrokes(st.config,st.strokes,0.4,0.3);
-					};
-				});
-				oekaki.receiveStroke(function(data){
-					drawStrokes(data.config,data.strokes,0.4,0.3);
-				});
-				oekaki.receiveAllClear(function(){
-					ctx.fillStyle = 'rgb(255, 255, 255)';
-					ctx.fillRect(0,0,canvas.width,canvas.height);
-				});
-			});
-		</script>
 	</head>
 	<body style="background-color:rgb(235, 235, 235);">
-		<h2>ブログパーツ</h2>
-		<div id="oekaki-chat">
-			<div id="oekaki-chat-label"></div>
-			<canvas id="oekaki-chat-canvas"></canvas>
+		<div class="oekaki-div">
+			<h2>Live配信用</h2>
+			<script>
+				$(function(){
+					// canvas要素のノードオブジェクト
+					var canvas = $('#oekaki-chat-canvas')[0];
+					var ctx = canvas.getContext('2d');
+
+					function drawStrokes(config,strokes,scaleX,scaleY) {
+						if(strokes.length<=0) return;
+						ctx.lineJoin = "round";
+						ctx.lineCap = "round";
+						ctx.strokeStyle = config.color;
+						ctx.lineWidth = config.size*scaleX;
+						ctx.beginPath();
+						ctx.moveTo(strokes[0].x*scaleX, strokes[0].y*scaleY);
+						for (var i = 1; i < strokes.length; i++) {
+							ctx.lineTo(strokes[i].x*scaleX, strokes[i].y*scaleY);
+						}
+						ctx.stroke();
+						ctx.closePath();
+					}
+
+					var oekaki = new OekakiClient('http://localhost:9001',0);
+					oekaki.receiveAllStroke(function(data){
+						$('#oekaki-chat-label').html(data.name);
+						for (var i = 0; i < data.stroke.length; i++) {
+							var st = data.stroke[i];
+							drawStrokes(st.config,st.strokes,0.4,0.3);
+						};
+					});
+					oekaki.receiveStroke(function(data){
+						drawStrokes(data.config,data.strokes,0.4,0.3);
+					});
+					oekaki.receiveAllClear(function(){
+						ctx.fillStyle = 'rgb(255, 255, 255)';
+						ctx.fillRect(0,0,canvas.width,canvas.height);
+					});
+				});
+			</script>
+			<div class="oekaki-chat" id="oekaki-chat">
+				<div id="oekaki-chat-label"></div>
+				<canvas class="oekaki-chat-canvas" id="oekaki-chat-canvas"></canvas>
+			</div>
+		</div>
+
+		<div class="oekaki-div">
+			<script>
+				$(function(){
+					// canvas要素のノードオブジェクト
+					var canvas = $('#oekaki-chat-canvas2')[0];
+					var ctx = canvas.getContext('2d');
+
+					function drawStrokes(config,strokes,scaleX,scaleY) {
+						if(strokes.length<=0) return;
+						ctx.lineJoin = "round";
+						ctx.lineCap = "round";
+						ctx.strokeStyle = config.color;
+						ctx.lineWidth = config.size*scaleX;
+						ctx.beginPath();
+						ctx.moveTo(strokes[0].x*scaleX, strokes[0].y*scaleY);
+						for (var i = 1; i < strokes.length; i++) {
+							ctx.lineTo(strokes[i].x*scaleX, strokes[i].y*scaleY);
+						}
+						ctx.stroke();
+						ctx.closePath();
+					}
+
+					var oekaki = new OekakiClient('http://localhost:9001',0);
+					var current_num = 0;
+					oekaki.receiveAllStroke(function(data){
+						$('#oekaki-chat-label2').html(data.name);
+						$('#total-stroke').html(data.stroke.length);
+						$('#current-stroke').html(current_num);
+
+						for (var i = 0; i < data.stroke.length; i++) {
+							var st = data.stroke[i];
+							drawStrokes(st.config,st.strokes,0.4,0.3);
+						};
+					});
+					oekaki.receiveStroke(function(data){
+						drawStrokes(data.config,data.strokes,0.4,0.3);
+					});
+					oekaki.receiveAllClear(function(){
+						ctx.fillStyle = 'rgb(255, 255, 255)';
+						ctx.fillRect(0,0,canvas.width,canvas.height);
+					});
+					$('#oekaki-start').click(function(){
+					});
+					$('#oekaki-stop').click(function(){
+					});
+					$('#oekaki-to-start').click(function(){
+					});
+				});
+			</script>
+			<h2>お絵かき自動再生</h2>
+			<div class="oekaki-chat" style="flaot:left;">
+				<div id="oekaki-chat-label2">自動再生</div>
+				<canvas class="oekaki-chat-canvas" id="oekaki-chat-canvas2"></canvas>
+				<div style="text-align:center;color:#000000;">
+					<span id="oekaki-start">再生</span> - 
+					<span id="oekaki-stop">停止</span> - 
+					<span id="oekaki-to-start">初めから</span> 
+					<span id="current-stroke">##</span>/<span id="total-stroke">##</span>
+				</div>
+			</div>
 		</div>
 	</body>
 </html>
