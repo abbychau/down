@@ -22,6 +22,8 @@ var db = mongoose.connect('mongodb://localhost/pixiv-oekaki-chat');
 //お絵かき用のスキーマを宣言。
 var OekakiSchema = new mongoose.Schema({
   id:Number
+  ,name:String
+  ,description:String
   ,clients:{}
   ,stroke_log:[mongoose.Schema.Types.Mixed]
 });
@@ -35,6 +37,8 @@ Oekaki.find(function(err,items){
     Oekaki.remove({},function(err){});
     var oekaki = new Oekaki({
       id:0
+      ,name:"テストルーム"
+      ,description:"テスト用のお絵かきデータです"
       ,clients:{}
       ,stroke_log:[]
     });
@@ -89,7 +93,10 @@ io.sockets.on('connection', function (socket) {
 
   //ストロークのログを取得
   socket.on('stroke_log',function (data){
-    socket.emit('stroke_log',{id:0,stroke:stroke_log});
+    Oekaki.findOne({id:0},function(err,item){
+      if(err){console.log(err);}
+      socket.emit('stroke_log',{id:0,name:item.name,description:item.description,stroke:stroke_log});
+    });
   });
 
   //ログイン通知
