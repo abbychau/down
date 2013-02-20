@@ -9,9 +9,10 @@ function copy(obj) {
   return hoge;
 }
 
-OekakiClient = function(server_url,_room_id){
+OekakiClient = function(server_url,_room_id,_name){
 	//クライアント情報
 	var client = {id:0,name:'no name',room_id:0};
+	if(_name) client.name = _name;
 	this.client = client;
 
 	//ストロークの時系列情報

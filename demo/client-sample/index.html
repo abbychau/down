@@ -63,8 +63,8 @@
 			drawBackground();//背景初期化
 
 			//お絵かきクライアントクラス
-			var oekaki = new OekakiClient('http://localhost:9001');
-
+			var client_name = $('#name').attr('value');
+			var oekaki = new OekakiClient('http://localhost:9001',0,client_name);
 
 			//-----------------
 			// イベントリスナー
