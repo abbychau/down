@@ -14,7 +14,7 @@
 	cd server
 	node app.js
 
-#####2.クライアントを起動
+#####3.クライアントを起動
 `/client-sample/index.html`をブラウザで開く
 
 #### プロトコル
