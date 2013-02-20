@@ -62,6 +62,7 @@ function makeClient(){
   var client = {
     id:++new_id,
     name:'No name',
+    room_id:DEFAULT_ROOM_ID,
     timeout_count:N_TIMEOUT
   };
   return client;
@@ -86,7 +87,7 @@ function saveStroke(_id){
 io.sockets.on('connection', function (socket) {
   var c = makeClient();
   clients[c.id] = c;
-  saveClient(DEFAULT_ROOM_ID);
+  saveClient(c.room_id);
 
   //初期化
   // ストロークの再生
@@ -94,9 +95,9 @@ io.sockets.on('connection', function (socket) {
 
   //ストロークのログを取得
   socket.on('stroke_log',function (data){
-    Oekaki.findOne({id:DEFAULT_ROOM_ID},function(err,item){
+    Oekaki.findOne({id:data.room_id},function(err,item){
       if(err){console.log(err);}
-      socket.emit('stroke_log',{id:item.id,name:item.name,description:item.description,stroke:stroke_log});
+      socket.emit('stroke_log',{id:item.id,name:item.name,description:item.description,stroke:item.stroke_log});
     });
   });
 

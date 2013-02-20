@@ -12,6 +12,9 @@ function copy(obj) {
 OekakiClient = function(server_url,_room_id,_name){
 	//クライアント情報
 	var client = {id:0,name:'no name',room_id:0};
+
+	//ルームIDがあればそこに接続、現在は必ず0になっており設定する必要が無い
+	if(_room_id) client.room_id = _room_id;
 	if(_name) client.name = _name;
 	this.client = client;
 
@@ -26,13 +29,6 @@ OekakiClient = function(server_url,_room_id,_name){
 	//1ストロークスタック
 	var stroke_stack = new Array();
 	this.stroke_stack = stroke_stack;
-
-
-
-	//ルームIDがあればそこに接続、現在は必ず0になっており設定する必要が無い
-	if(_room_id){
-		this.client.room_id = _room_id;
-	}
 
 	//WebSocket
 	var socket = io.connect(server_url);
@@ -130,7 +126,7 @@ OekakiClient.prototype = {
 		this.socket.on('stroke_log',function (data) {
 			_callback(data);
 		});
-		this.socket.emit('stroke_log');
+		this.socket.emit('stroke_log',this.client);
 	},
 	receiveStroke:function(_callback){
 		/*
