@@ -29,23 +29,6 @@
 				var canvas = $('#oekaki-chat-canvas')[0];
 				var ctx = canvas.getContext('2d');
 
-				function drawBackground() {
-					ctx.fillStyle = 'rgb(255, 255, 255)';
-					ctx.fillRect(0,0,canvas.width,canvas.height);
-				};
-
-				function drawLine(prev,next,config) {
-					ctx.lineJoin = "round";
-					ctx.lineCap = "round";
-					ctx.strokeStyle = config.color;
-					ctx.lineWidth = config.size;
-					ctx.beginPath();
-					ctx.moveTo(prev.x, prev.y);
-					ctx.lineTo(next.x, next.y);
-					ctx.stroke();
-					ctx.closePath();
-				}
-
 				function drawStrokes(config,strokes,scaleX,scaleY) {
 					if(strokes.length<=0) return;
 					ctx.lineJoin = "round";
@@ -68,6 +51,13 @@
 						var st = data.stroke[i];
 						drawStrokes(st.config,st.strokes,0.4,0.3);
 					};
+				});
+				oekaki.receiveStroke(function(data){
+					drawStrokes(data.config,data.strokes,0.4,0.3);
+				});
+				oekaki.receiveAllClear(function(){
+					ctx.fillStyle = 'rgb(255, 255, 255)';
+					ctx.fillRect(0,0,canvas.width,canvas.height);
 				});
 			});
 		</script>
