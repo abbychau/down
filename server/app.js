@@ -101,6 +101,14 @@ io.sockets.on('connection', function (socket) {
     });
   });
 
+  //メンバー取得
+  socket.on('members', function (data) {
+    Oekaki.findOne({id:data.room_id},function(err,item){
+      if(err){console.log(err);}
+      socket.emit('members',{id:item.id,name:item.name,description:item.description,clients:item.clients});
+    });
+  });
+
   //ログイン通知
   socket.on('init', function (data) {
     clients[data.id].name = data.name;
@@ -109,7 +117,7 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
   });
 
-  //ログイン通知
+  //ログ削除
   socket.on('all-clear', function (data) {
     stroke_log.length = 0;
     saveStroke(DEFAULT_ROOM_ID);

@@ -143,6 +143,20 @@ OekakiClient.prototype = {
 			_callback(data);
 		});
 	},
+	receiveMenbers:function(_callback){
+		/*
+		 メンバーリストを受け取ったとき
+			data = {
+				id:Number
+				,config:{size:Number,color:String}
+				,strokes:[{x:Number,y:Number}]
+			}
+		*/
+		this.socket.on('members',function (data) {
+			_callback(data);
+		});
+		this.socket.emit('members',this.client)
+	},
 	receiveMessage:function(_callback){
 		/*
 		 メッセージを受け取ったとき
