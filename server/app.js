@@ -153,7 +153,7 @@ io.sockets.on('connection', function (socket) {
   setInterval(function(){
     if(clients[c.id] && --clients[c.id].timeout_count < 0){
       //退出したことを通知
-      if(data.name!='no name')
+      if(c.name!='no name')
         socket.broadcast.emit('message',{id:0,name:'アナウンス',message:c.name+'('+c.id+')'+'さんがログアウトしました。'});
       delete clients[c.id];
       //DB更新
