@@ -158,6 +158,25 @@
 				text.val(data.name+'('+data.id+')'+':'+data.message+'\n'+text.val());
 			});
 
+			//メンバーリストを受信	
+			setInterval(function(){
+				oekaki.receiveMembers(function(data){
+					var member = new Object();
+					var list = $('#member-list');
+					list.html('');
+					for(var i in data.clients){
+						if(member[data.clients[i].name]!=null){
+							member[data.clients[i].name]++;
+						}else{
+							member[data.clients[i].name] = 1;
+						}
+					}
+
+					for(var name in member){
+						list.append(name+'('+member[name] + '), ')
+					}
+				});
+			},1000);
 
 			//-----------------------------------
 			//スライダー設定
@@ -233,6 +252,7 @@
 		<canvas id="canvas" width="640" height="480"></canvas><br/>
 	</div>
 	<div class="controller">
+		<div class="member-list-div">参加中のメンバー：<span id="member-list"></span></div>
 		<input id="name" type="text" style="width:100px;" value="no name"/>
 		<input id="message" type="text" style="width:450px;"/>
 		<input id="send" type="button" value="Send Message" style="width:135px;"/><br/>

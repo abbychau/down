@@ -143,7 +143,7 @@ OekakiClient.prototype = {
 			_callback(data);
 		});
 	},
-	receiveMenbers:function(_callback){
+	receiveMembers:function(_callback){
 		/*
 		 メンバーリストを受け取ったとき
 			data = {
