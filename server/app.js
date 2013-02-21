@@ -61,7 +61,7 @@ Oekaki.findOne({id:DEFAULT_ROOM_ID},function(err,item){
 function makeClient(){
   var client = {
     id:++new_id,
-    name:'No name',
+    name:'no name',
     room_id:DEFAULT_ROOM_ID,
     timeout_count:N_TIMEOUT
   };
@@ -114,7 +114,8 @@ io.sockets.on('connection', function (socket) {
     clients[data.id].name = data.name;
     saveClient(DEFAULT_ROOM_ID);
 
-    socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
+    if(data.name!='no name')
+      socket.broadcast.emit('message',{id:0,name:'アナウンス',message:data.name+'('+data.id+')'+'さんがログインしました。'});
   });
 
   //ログ削除
@@ -152,7 +153,8 @@ io.sockets.on('connection', function (socket) {
   setInterval(function(){
     if(clients[c.id] && --clients[c.id].timeout_count < 0){
       //退出したことを通知
-      socket.broadcast.emit('message',{id:0,name:'アナウンス',message:c.name+'('+c.id+')'+'さんがログアウトしました。'});
+      if(data.name!='no name')
+        socket.broadcast.emit('message',{id:0,name:'アナウンス',message:c.name+'('+c.id+')'+'さんがログアウトしました。'});
       delete clients[c.id];
       //DB更新
       saveClient(DEFAULT_ROOM_ID);
