@@ -22,6 +22,14 @@
 				height: 240px;
 				margin-left: 10px;
 			}
+			.oekaki-button {
+				padding: 3px;
+				background-color: #BCBCBC;
+				border: solid 1px #000000;
+			}
+			.button-selected {
+				color: #CC0000;
+			}
 		</style>
 	</head>
 	<body style="background-color:rgb(235, 235, 235);">
@@ -95,6 +103,8 @@
 
 					var oekaki = new OekakiClient('http://localhost:9001',0);
 					var current_num = 0;
+					var is_start = false;
+					var oekaki_log = null;
 					oekaki.receiveAllStroke(function(data){
 						$('#oekaki-chat-label2').html(data.name);
 						$('#total-stroke').html(data.stroke.length);
@@ -104,30 +114,49 @@
 							var st = data.stroke[i];
 							drawStrokes(st.config,st.strokes,0.4,0.3);
 						};
+
+						oekaki_log = data.stroke;
 					});
-					oekaki.receiveStroke(function(data){
-						drawStrokes(data.config,data.strokes,0.4,0.3);
-					});
-					oekaki.receiveAllClear(function(){
-						ctx.fillStyle = 'rgb(255, 255, 255)';
-						ctx.fillRect(0,0,canvas.width,canvas.height);
-					});
+
 					$('#oekaki-start').click(function(){
+						if(current_num==0){
+							ctx.fillStyle = 'rgb(255, 255, 255)';
+							ctx.fillRect(0,0,canvas.width,canvas.height);
+						}
+
+						$('.oekaki-button').removeClass('button-selected');
+						$(this).addClass('button-selected');
+						is_start = true;
 					});
 					$('#oekaki-stop').click(function(){
+						$('.oekaki-button').removeClass('button-selected');
+						$(this).addClass('button-selected');
+						is_start = false;
 					});
 					$('#oekaki-to-start').click(function(){
+						$('.oekaki-button').removeClass('button-selected');
+						is_start = false;
+						current_num = 0;
 					});
+
+					setInterval(function(){
+						if(is_start && current_num < oekaki_log.length){
+							var data = oekaki_log[current_num];
+							drawStrokes(data.config,data.strokes,0.4,0.3);
+							current_num++;
+						}
+						$('#current-stroke').html(current_num);
+					},200);
 				});
 			</script>
 			<h2>お絵かき自動再生</h2>
 			<div class="oekaki-chat" style="flaot:left;">
 				<div id="oekaki-chat-label2">自動再生</div>
 				<canvas class="oekaki-chat-canvas" id="oekaki-chat-canvas2"></canvas>
-				<div style="text-align:center;color:#000000;">
-					<span id="oekaki-start">再生</span> - 
-					<span id="oekaki-stop">停止</span> - 
-					<span id="oekaki-to-start">初めから</span> 
+				<div style="text-align:center;">
+					<span class="oekaki-button" id="oekaki-start">再生</span> - 
+					<span class="oekaki-button" id="oekaki-stop">停止</span> - 
+					<span class="oekaki-button" id="oekaki-to-start">初めから</span> 
 					<span id="current-stroke">##</span>/<span id="total-stroke">##</span>
 				</div>
 			</div>
